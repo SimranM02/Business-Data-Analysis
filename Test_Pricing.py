@@ -1,38 +1,38 @@
-#costliest test in each city
+#test pricing in each city ascending order
 import pandas as pd
 import matplotlib.pyplot as plt
-import os
 
 def analyze_blood_test_dataset(file_path):
-    f = open(file_path);
-
     data = pd.read_csv(file_path)
 
-    grouped_data = data.groupby('Location')
+    grouped_data = data.groupby('Test Name')
 
-    locations = []
-    test_names = []
-    average_costs = []
+    for test_name, test_data in grouped_data:
+        city_data = test_data.groupby('Location')
 
-    for location, location_data in grouped_data:
-        locations.append(location)
+        cities = []
+        costs = []
 
-        test_costs = location_data.groupby('Test Name')['Cost ($)'].mean()
+        for city, city_test_data in city_data:
+            cities.append(city)
+            max_cost = city_test_data['Price ($)'].max()
+            costs.append(max_cost)
 
-        for test_name, cost in test_costs.items():
-            test_names.append(test_name)
-            average_costs.append(cost)
+        sorted_data = sorted(zip(cities, costs), key=lambda x: x[1])
+        cities, costs = zip(*sorted_data)
 
-        plt.figure(figsize=(8, 6))
-        plt.bar(test_names, average_costs)
-        plt.title(f"Blood Test Costs in {location}")
-        plt.xlabel("Test Name")
-        plt.ylabel("Average Cost ($)")
+        most_expensive_index = costs.index(max(costs))
+
+        colors = ['lightskyblue'] * len(cities)
+        colors[most_expensive_index] = 'lightcoral'
+
+        plt.figure(figsize=(4, 3))
+        plt.bar(cities, costs, color=colors)
+        plt.title(f"Relative test pricing in different cities - {test_name}")
+        plt.xlabel("City")
+        plt.ylabel("Price ($)")
         plt.xticks(rotation=90)
         plt.show()
-
-        test_names.clear()
-        average_costs.clear()
 
 file_path = "/content/blood test data.csv"
 analyze_blood_test_dataset(file_path)

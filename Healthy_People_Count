@@ -1,0 +1,28 @@
+import pandas as pd
+
+data = pd.read_csv('/content/Test results citywise.csv')
+
+test_names = data['Test Name'].unique()
+cities = data['Location'].unique()
+
+for test in test_names:
+    test_data = data[data['Test Name'] == test]
+
+    print(f'{test} - Test Results')
+
+    for city in cities:
+        city_data = test_data[test_data['Location'] == city]
+
+        if not city_data.empty:  
+            test_results = city_data['Test Result']
+            healthy_range_left = city_data['Healthy Range Left'].iloc[0]
+            healthy_range_right = city_data['Health Range Right'].iloc[0]
+
+            is_healthy = (test_results >= healthy_range_left) & (test_results <= healthy_range_right)
+
+            num_healthy = sum(is_healthy)
+            num_unhealthy = len(is_healthy) - num_healthy
+
+            print(f'{city}: {num_healthy} healthy, {num_unhealthy} unhealthy')
+
+    print()
